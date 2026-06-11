@@ -1,0 +1,43 @@
+name: Sync SOLAR Upstream
+
+on:
+  push:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout adapter repository
+        uses: actions/checkout@v4
+
+      - name: Configure Git identity
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Sync SOLAR and record manifest
+        run: |
+          bash scripts/sync_solar.sh
+
+      - name: Check SOLAR builds
+        run: |
+          cd upstream/solar/src
+          make
+          test -x ../bin/solar
+
+      - name: Commit manifest update
+        run: |
+          git add upstream/manifest.json
+          if git diff --staged --quiet; then
+            echo "No upstream revision change detected."
+          else
+            git commit -m "Auto-sync SOLAR upstream manifest"
+            git push
+          fi
+

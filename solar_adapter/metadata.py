@@ -1,0 +1,100 @@
+"""Curated SOLAR problem metadata.
+
+The first version records only public README-level metadata. Bounds and
+starting points must be filled from upstream tests/help output before enabling
+OptiProfiler selection.
+"""
+
+PROBLEMS = [
+    {
+        "name": "SOLAR1_MAXNRG_H1",
+        "pb_id": 1,
+        "description": "total solar energy on the receiver",
+        "n": 9,
+        "m_objectives": 1,
+        "m_constraints": 5,
+        "enabled": False,
+        "reason_disabled": "bounds and x0 metadata not curated yet",
+    },
+    {
+        "name": "SOLAR2_MINSURF_H1",
+        "pb_id": 2,
+        "description": "total heliostats field surface",
+        "n": 14,
+        "m_objectives": 1,
+        "m_constraints": 13,
+        "enabled": False,
+        "reason_disabled": "bounds and x0 metadata not curated yet",
+    },
+    {
+        "name": "SOLAR3_MINCOST_C1",
+        "pb_id": 3,
+        "description": "total investment cost",
+        "n": 20,
+        "m_objectives": 1,
+        "m_constraints": 13,
+        "enabled": False,
+        "reason_disabled": "bounds and x0 metadata not curated yet",
+    },
+    {
+        "name": "SOLAR4_MINCOST_C2",
+        "pb_id": 4,
+        "description": "total investment cost",
+        "n": 29,
+        "m_objectives": 1,
+        "m_constraints": 16,
+        "enabled": False,
+        "reason_disabled": "bounds and x0 metadata not curated yet",
+    },
+    {
+        "name": "SOLAR5_MAXCOMP_HTF1",
+        "pb_id": 5,
+        "description": "compliance to a demand profile",
+        "n": 20,
+        "m_objectives": 1,
+        "m_constraints": 12,
+        "enabled": False,
+        "reason_disabled": "bounds and x0 metadata not curated yet",
+    },
+    {
+        "name": "SOLAR6_MINCOST_TS",
+        "pb_id": 6,
+        "description": "cost of storage",
+        "n": 5,
+        "m_objectives": 1,
+        "m_constraints": 6,
+        "enabled": False,
+        "reason_disabled": "bounds and x0 metadata not curated yet",
+    },
+    {
+        "name": "SOLAR7_MAXEFF_RE",
+        "pb_id": 7,
+        "description": "receiver efficiency",
+        "n": 7,
+        "m_objectives": 1,
+        "m_constraints": 6,
+        "enabled": False,
+        "reason_disabled": "bounds and x0 metadata not curated yet",
+    },
+    {
+        "name": "SOLAR10_MINCOST_UNCONSTRAINED",
+        "pb_id": 10,
+        "description": "cost of storage plus penalties",
+        "n": 5,
+        "m_objectives": 1,
+        "m_constraints": 0,
+        "enabled": False,
+        "reason_disabled": "bounds and x0 metadata not curated yet",
+    },
+    {
+        "name": "SOLAR11_MINCOST_CH",
+        "pb_id": 11,
+        "description": "total investment cost",
+        "n": 31,
+        "m_objectives": 1,
+        "m_constraints": 16,
+        "enabled": False,
+        "reason_disabled": "bounds and x0 metadata not curated yet",
+    },
+]
+
