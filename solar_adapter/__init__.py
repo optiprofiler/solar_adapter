@@ -1,7 +1,12 @@
 """Common SOLAR executable adapter scaffolding."""
 
 from .metadata import PROBLEMS
-from .runner import SolarEvaluation, parse_solar_output
+from .runner import SolarEvaluation, SolarExecutionError, parse_solar_output, run_solar
 
-__all__ = ["PROBLEMS", "SolarEvaluation", "parse_solar_output"]
-
+__all__ = [
+    "PROBLEMS",
+    "SolarEvaluation",
+    "SolarExecutionError",
+    "parse_solar_output",
+    "run_solar",
+]

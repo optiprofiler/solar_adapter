@@ -65,7 +65,7 @@ No linear constraints should be invented unless SOLAR metadata explicitly
 separates them. At the adapter boundary, SOLAR constraints are initially treated
 as nonlinear inequalities `cub(x) <= 0`.
 
-## Shared Evaluation Cache
+## Adapter Oracle Cache and OptiProfiler Accounting
 
 OptiProfiler may call:
 
@@ -75,7 +75,7 @@ problem.cub(x)
 ```
 
 for the same `x`. A naive wrapper would launch SOLAR twice. The adapter should
-cache the most recent `x` and parsed result:
+cache the most recent raw SOLAR oracle result:
 
 ```python
 class SolarProblemState:
@@ -100,7 +100,26 @@ class SolarProblemState:
         return self._eval(x).constraints
 ```
 
-This cache should be per problem object, not global across tasks.
+This cache must be private to the adapter oracle. It is only an executable
+acceleration layer and must not change OptiProfiler's evaluation accounting.
+
+In particular:
+
+- `fun(x)` must not call the OptiProfiler-visible `cub(x)` or `ceq(x)`.
+- `cub(x)` must not call the OptiProfiler-visible `fun(x)` or `ceq(x)`.
+- A SOLAR executable call made while answering `fun(x)` may cache objective and
+  constraint numbers internally, but OptiProfiler should see only a function
+  evaluation.
+- If OptiProfiler later asks `cub(x)` at the same point, `cub(x)` may reuse the
+  adapter cache instead of rerunning SOLAR; OptiProfiler should see only the
+  constraint evaluation it explicitly requested.
+- The cache should be per problem object, not global across tasks or solver
+  runs.
+
+This distinction matters because OptiProfiler's `Problem` / featured problem
+layer records objective and constraint histories separately. SOLAR's executable
+is a joint oracle, but the adapter must preserve OptiProfiler's public
+`fun`/`cub`/`ceq` semantics.
 
 ## Selection
 
@@ -131,4 +150,3 @@ Later options:
 - expose stochastic instances under a dedicated feature or benchmark family;
 - keep multiobjective SOLAR instances out of standard scalar DFO profiles until
   a multiobjective policy exists.
-

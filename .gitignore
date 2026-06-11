@@ -1,0 +1,8 @@
+upstream/solar/
+upstream/*.zip
+build/
+dist/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+.DS_Store
