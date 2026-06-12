@@ -85,6 +85,20 @@ commit the generated executable, object files, upstream `tests/`, or upstream
 stays upstream; our wrapper repositories carry only what is needed to run the
 selected OptiProfiler problems reproducibly.
 
+## Automation
+
+`.github/workflows/sync_solar.yml` checks upstream SOLAR on a schedule and on
+manual dispatch. It records the exact upstream commit in
+`upstream/manifest.json`, builds the executable, and smoke-tests enabled scalar
+problems while skipping metadata-marked slow cases such as
+`SOLAR5_MAXCOMP_HTF1`.
+
+When the upstream manifest changes, the workflow can dispatch runtime-sync
+events to `solar_python` and `solar_matlab`. This requires a repository secret
+named `SOLAR_SYNC_TOKEN` with permission to call `repository_dispatch` on those
+wrapper repositories. `.github/workflows/ci.yml` runs the same build, smoke, and
+slim-runtime export checks on ordinary pushes and pull requests.
+
 ## Why Not `solar_python` and `solar_matlab` Immediately?
 
 SOLAR is a C++ executable interface, not a Python-native or MATLAB-native

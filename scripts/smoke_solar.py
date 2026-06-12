@@ -32,6 +32,17 @@ def main() -> int:
         help="Smoke-test only problems enabled for scalar OptiProfiler use.",
     )
     parser.add_argument(
+        "--skip-slow",
+        action="store_true",
+        help="Skip problems annotated as slow in metadata.",
+    )
+    parser.add_argument(
+        "--slow-threshold-sec",
+        type=float,
+        default=30.0,
+        help="Problems with default_x0_runtime_sec above this value are slow.",
+    )
+    parser.add_argument(
         "--json",
         type=Path,
         help="Optional path for a JSON smoke report.",
@@ -41,6 +52,11 @@ def main() -> int:
     rows = []
     failures = 0
     problems = [p for p in PROBLEMS if p.get("enabled", False)] if args.enabled_only else PROBLEMS
+    if args.skip_slow:
+        problems = [
+            p for p in problems
+            if float(p.get("default_x0_runtime_sec", 0.0)) <= args.slow_threshold_sec
+        ]
     for problem in problems:
         expected_failure = bool(problem.get("expected_smoke_failure", False))
         try:

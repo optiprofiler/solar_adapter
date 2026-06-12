@@ -1,10 +1,19 @@
 name: Sync SOLAR Upstream
 
 on:
-  push:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
+    inputs:
+      sync_method:
+        description: "Upstream fetch method"
+        required: false
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - git
+          - archive
 
 permissions:
   contents: write
@@ -16,28 +25,67 @@ jobs:
       - name: Checkout adapter repository
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
       - name: Configure Git identity
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
       - name: Sync SOLAR and record manifest
+        env:
+          SOLAR_SYNC_METHOD: ${{ github.event.inputs.sync_method || 'auto' }}
         run: |
           bash scripts/sync_solar.sh
 
       - name: Check SOLAR builds
         run: |
-          cd upstream/solar/src
-          make
-          test -x ../bin/solar
+          bash scripts/build_solar.sh
+
+      - name: Smoke-test enabled scalar problems
+        run: |
+          python scripts/smoke_solar.py \
+            --enabled-only \
+            --skip-slow \
+            --timeout-sec 180 \
+            --json build/smoke-enabled.json
 
       - name: Commit manifest update
+        id: commit-manifest
         run: |
           git add upstream/manifest.json
           if git diff --staged --quiet; then
             echo "No upstream revision change detected."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "Auto-sync SOLAR upstream manifest"
             git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Dispatch wrapper runtime syncs
+        if: steps.commit-manifest.outputs.changed == 'true'
+        env:
+          SOLAR_SYNC_TOKEN: ${{ secrets.SOLAR_SYNC_TOKEN }}
+        run: |
+          if [ -z "${SOLAR_SYNC_TOKEN:-}" ]; then
+            echo "SOLAR_SYNC_TOKEN is not configured; skipping downstream dispatch."
+            exit 0
+          fi
+
+          upstream_commit="$(python3 - <<'PY'
+import json
+print(json.load(open("upstream/manifest.json"))["upstream"]["commit"])
+PY
+)"
+
+          for repo in solar_python solar_matlab; do
+            curl -fsS -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${SOLAR_SYNC_TOKEN}" \
+              "https://api.github.com/repos/optiprofiler/${repo}/dispatches" \
+              -d "{\"event_type\":\"solar-runtime-updated\",\"client_payload\":{\"adapter_ref\":\"${GITHUB_REF_NAME}\",\"upstream_commit\":\"${upstream_commit}\"}}"
+          done

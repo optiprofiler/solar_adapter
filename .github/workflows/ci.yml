@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run unit tests
+        run: |
+          python -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Sync current upstream snapshot
+        run: |
+          bash scripts/sync_solar.sh
+
+      - name: Build SOLAR executable
+        run: |
+          bash scripts/build_solar.sh
+
+      - name: Smoke-test enabled scalar problems
+        run: |
+          python scripts/smoke_solar.py \
+            --enabled-only \
+            --skip-slow \
+            --timeout-sec 180 \
+            --json build/smoke-enabled.json
+
+      - name: Export slim runtime
+        run: |
+          bash scripts/export_runtime.sh build/solar-runtime
+          test -f build/solar-runtime/metadata/problems.json
+          test -f build/solar-runtime/metadata/probinfo.csv
+
+      - name: Upload smoke report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: solar-adapter-smoke-report
+          if-no-files-found: ignore
+          path: build/smoke-enabled.json
