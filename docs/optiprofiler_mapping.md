@@ -121,6 +121,28 @@ layer records objective and constraint histories separately. SOLAR's executable
 is a joint oracle, but the adapter must preserve OptiProfiler's public
 `fun`/`cub`/`ceq` semantics.
 
+The wrapper must also avoid expensive simulator calls while the `Problem`
+constructor is only inferring output dimensions. Shape-probe shortcuts may
+return a correctly sized placeholder, but only inside the adapter boundary.
+They must not append objective or constraint histories and must not leak into
+normal user evaluations.
+
+## Runtime Contents
+
+The language-specific repositories should use the generated slim runtime from
+`scripts/export_runtime.sh`. They should include the source needed to rebuild
+SOLAR, the license/provenance files, and the generated OptiProfiler metadata.
+They should not include upstream's large `tests/` directory, upstream `.git`
+history, generated object files, or generated binaries.
+
+The intended lifecycle is:
+
+1. `solar_adapter` syncs and records an upstream commit.
+2. `solar_adapter` validates metadata against the executable.
+3. `scripts/export_runtime.sh` produces a slim runtime.
+4. `solar_python` and `solar_matlab` vendor that runtime source and build the
+   executable locally or in CI.
+
 ## Selection
 
 `solar_select(options)` should filter metadata by OptiProfiler's standard

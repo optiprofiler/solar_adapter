@@ -34,6 +34,7 @@ def run_solar(
     fidelity: float = 1.0,
     replications: int | float = 1,
     n_objectives: int = 1,
+    n_constraints: int | None = None,
     timeout_sec: float = 300.0,
 ) -> SolarEvaluation:
     """Run the SOLAR executable once and parse its output."""
@@ -76,7 +77,11 @@ def run_solar(
         )
 
     try:
-        parsed = parse_solar_output(completed.stdout, n_objectives=n_objectives)
+        parsed = parse_solar_output(
+            completed.stdout,
+            n_objectives=n_objectives,
+            n_constraints=n_constraints,
+        )
     except ValueError as exc:
         raise SolarExecutionError(
             f"SOLAR output could not be parsed: {completed.stdout!r}"
@@ -91,7 +96,11 @@ def run_solar(
     )
 
 
-def parse_solar_output(stdout: str, n_objectives: int = 1) -> SolarEvaluation:
+def parse_solar_output(
+    stdout: str,
+    n_objectives: int = 1,
+    n_constraints: int | None = None,
+) -> SolarEvaluation:
     """Parse one-line SOLAR numeric output.
 
     The initial adapter policy handles scalar-objective problems. Remaining
@@ -103,6 +112,11 @@ def parse_solar_output(stdout: str, n_objectives: int = 1) -> SolarEvaluation:
     values = _last_numeric_line(stdout)
     if len(values) < n_objectives:
         raise ValueError("SOLAR output does not contain enough numeric values")
+    if n_constraints is not None and len(values) != n_objectives + n_constraints:
+        raise ValueError(
+            "SOLAR output contains "
+            f"{len(values)} numeric values, expected {n_objectives + n_constraints}"
+        )
     objectives = tuple(values[:n_objectives])
     constraints = tuple(values[n_objectives:])
     return SolarEvaluation(
