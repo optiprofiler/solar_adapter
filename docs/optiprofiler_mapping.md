@@ -160,6 +160,27 @@ Since the initial SOLAR mapping treats constraints as nonlinear inequalities,
 most enabled SOLAR instances will have `ptype == "n"` except the unconstrained
 instance.
 
+## Integer Variables
+
+SOLAR's metadata distinguishes real variables (`R`) from integer/categorical
+variables (`I`). Several enabled scalar instances are mixed-integer. Upstream
+SOLAR rejects noninteger values for these coordinates, which is a poor fit for
+continuous DFO solvers that naturally propose real-valued trial points.
+
+The first wrapper policy is:
+
+1. keep `x0`, `xl`, and `xu` visible to OptiProfiler in the original dimension;
+2. immediately before calling the SOLAR executable, round every `I` coordinate
+   to the nearest integer;
+3. clip rounded integer coordinates to their finite integer bounds;
+4. cache and account evaluations under OptiProfiler's usual `fun`/`cub`
+   semantics, without adding extra visible evaluations.
+
+This policy makes mixed-integer SOLAR instances runnable by continuous solvers,
+but it must be reported as a wrapper-level rounding rule. It should not be
+confused with a native continuous benchmark. A strictly continuous DFO subset
+should use only the pure-real SOLAR instances, currently SOLAR 6 and SOLAR 10.
+
 ## Stochastic and Fidelity Policy
 
 The first adapter version should avoid changing OptiProfiler's feature model.
