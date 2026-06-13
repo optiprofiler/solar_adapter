@@ -8,6 +8,7 @@ if [ ! -d "$checkout_dir" ]; then
     bash "$root/scripts/sync_solar.sh"
 fi
 
+mkdir -p "$checkout_dir/bin"
 make -C "$checkout_dir/src"
 test -x "$checkout_dir/bin/solar"
 
