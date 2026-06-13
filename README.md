@@ -85,6 +85,12 @@ commit the generated executable, object files, upstream `tests/`, or upstream
 stays upstream; our wrapper repositories carry only what is needed to run the
 selected OptiProfiler problems reproducibly.
 
+Before compiling or exporting the slim runtime, the adapter applies a small
+compatibility patch to the transient checkout: upstream currently has one
+unqualified `isnan` call that macOS accepts but Linux `g++` rejects, so the
+adapter rewrites it to `std::isnan`. The upstream commit remains recorded in
+`upstream/manifest.json`.
+
 ## Automation
 
 `.github/workflows/sync_solar.yml` checks upstream SOLAR on a schedule and on
