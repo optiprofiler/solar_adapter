@@ -8,7 +8,7 @@ on:
       sync_method:
         description: "Upstream fetch method"
         required: false
-        default: "auto"
+        default: "archive"
         type: choice
         options:
           - auto
@@ -76,11 +76,7 @@ jobs:
             exit 0
           fi
 
-          upstream_commit="$(python3 - <<'PY'
-import json
-print(json.load(open("upstream/manifest.json"))["upstream"]["commit"])
-PY
-)"
+          upstream_commit="$(python3 -c 'import json; print(json.load(open("upstream/manifest.json"))["upstream"]["commit"])')"
 
           for repo in solar_python solar_matlab; do
             curl -fsS -X POST \

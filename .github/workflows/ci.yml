@@ -24,6 +24,8 @@ jobs:
           python -m unittest discover -s tests -p 'test_*.py'
 
       - name: Sync current upstream snapshot
+        env:
+          SOLAR_SYNC_METHOD: archive
         run: |
           bash scripts/sync_solar.sh
 
