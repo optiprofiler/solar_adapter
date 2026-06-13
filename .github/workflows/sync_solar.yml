@@ -37,7 +37,7 @@ jobs:
 
       - name: Sync SOLAR and record manifest
         env:
-          SOLAR_SYNC_METHOD: ${{ github.event.inputs.sync_method || 'auto' }}
+          SOLAR_SYNC_METHOD: ${{ github.event.inputs.sync_method || 'archive' }}
         run: |
           bash scripts/sync_solar.sh
 
