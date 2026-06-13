@@ -4,14 +4,14 @@
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 
 
 def patch_heat_exchanger(src_dir: Path) -> bool:
     path = src_dir / "HeatExchanger.cpp"
     text = path.read_text(encoding="utf-8")
-    patched = text.replace("isnan(T_in_ms)", "std::isnan(T_in_ms)")
-    patched = patched.replace("isnan(T_out_ms)", "std::isnan(T_out_ms)")
+    patched = re.sub(r"(?<!std::)\bisnan\(", "std::isnan(", text)
     if patched != text:
         path.write_text(patched, encoding="utf-8")
         return True
