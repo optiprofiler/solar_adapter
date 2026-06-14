@@ -17,7 +17,9 @@ OptiProfiler wrappers.
 
 - Upstream: `https://github.com/bbopt/solar`
 - Upstream default branch: `master`
-- Upstream license: LGPL-2.1
+- Upstream license file: LGPL-2.1; current source headers mention LGPL version
+  3 or later. Keep both the license file and source notices in distributed
+  runtime snapshots.
 - Current upstream commit recorded at scaffold time:
   `dda8fd7f98d4392aa07b3e3056888624a00712a0`
 - Public website status: not listed until `solar_python` and `solar_matlab`
@@ -163,9 +165,10 @@ See [docs/protocol.md](docs/protocol.md) and
 
 ## License and Citation
 
-SOLAR is reported by GitHub as LGPL-2.1. This adapter should keep SOLAR as an
-upstream dependency, preserve license notices, and record the upstream commit in
-`upstream/manifest.json` for every sync.
+SOLAR ships an LGPL-2.1 license file in the upstream snapshot, while current
+source headers mention LGPL version 3 or later. This adapter should keep SOLAR
+as an upstream dependency, preserve license notices, and record the upstream
+commit in `upstream/manifest.json` for every sync.
 
 Any distributed artifact that includes SOLAR source or binaries should include:
 
