@@ -7,8 +7,13 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - name: Checkout repository
@@ -19,21 +24,39 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Set up MSYS2 toolchain
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: make unzip mingw-w64-ucrt-x86_64-gcc
+
+      - name: Add MSYS2 tools to PATH
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          "C:\msys64\ucrt64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          "C:\msys64\usr\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
       - name: Run unit tests
         run: |
           python -m unittest discover -s tests -p 'test_*.py'
 
       - name: Sync current upstream snapshot
+        shell: bash
         env:
-          SOLAR_SYNC_METHOD: archive
+          SOLAR_SYNC_METHOD: git
         run: |
           bash scripts/sync_solar.sh
 
       - name: Build SOLAR executable
+        shell: bash
         run: |
           bash scripts/build_solar.sh
 
       - name: Smoke-test enabled scalar problems
+        shell: bash
         run: |
           python scripts/smoke_solar.py \
             --enabled-only \
@@ -42,6 +65,7 @@ jobs:
             --json build/smoke-enabled.json
 
       - name: Export slim runtime
+        shell: bash
         run: |
           bash scripts/export_runtime.sh build/solar-runtime
           test -f build/solar-runtime/metadata/problems.json
@@ -51,6 +75,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: solar-adapter-smoke-report
+          name: solar-adapter-smoke-report-${{ matrix.os }}
           if-no-files-found: ignore
           path: build/smoke-enabled.json

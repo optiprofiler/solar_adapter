@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import unittest
 
 from solar_adapter.runner import format_point, parse_solar_output, run_solar
@@ -19,7 +20,8 @@ class RunnerTests(unittest.TestCase):
         )
 
     def test_run_solar_readme_example_when_built(self) -> None:
-        executable = Path("upstream/solar/bin/solar")
+        suffix = ".exe" if os.name == "nt" else ""
+        executable = Path(f"upstream/solar/bin/solar{suffix}")
         if not executable.exists():
             self.skipTest("upstream SOLAR executable is not built")
 

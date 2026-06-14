@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -13,11 +14,16 @@ from solar_adapter.metadata import PROBLEMS
 from solar_adapter.runner import SolarExecutionError, run_solar
 
 
+def _default_executable() -> str:
+    suffix = ".exe" if os.name == "nt" else ""
+    return f"upstream/solar/bin/solar{suffix}"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--executable",
-        default="upstream/solar/bin/solar",
+        default=_default_executable(),
         help="Path to the SOLAR executable.",
     )
     parser.add_argument(

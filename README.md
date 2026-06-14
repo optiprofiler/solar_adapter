@@ -76,7 +76,7 @@ are not part of the OptiProfiler runtime.
 
 `scripts/export_runtime.sh` builds and exports a slim runtime containing only:
 
-- `bin/solar`, when building a local smoke-test artifact;
+- `bin/solar` or `bin/solar.exe`, when building a local smoke-test artifact;
 - `src/*.cpp`, `src/*.hpp`, and `src/makefile`, so CI or a server can rebuild;
 - `LICENSE`, upstream README, and `upstream/manifest.json`;
 - generated OptiProfiler metadata under `metadata/`.
@@ -86,6 +86,10 @@ commit the generated executable, object files, upstream `tests/`, or upstream
 `.git` directory. In other words, benchmark data that belongs to SOLAR upstream
 stays upstream; our wrapper repositories carry only what is needed to run the
 selected OptiProfiler problems reproducibly.
+
+The build is checked on Linux, macOS, and Windows in CI. Windows jobs use
+MSYS2/MinGW so the same upstream makefile can be exercised with `make` and
+`g++`; the resulting executable name is `solar.exe`.
 
 Before compiling or exporting the slim runtime, the adapter applies a small
 compatibility patch to the transient checkout: upstream currently has one

@@ -13,15 +13,23 @@ manifest="$upstream_dir/manifest.json"
 mkdir -p "$upstream_dir"
 rm -rf "$checkout_dir"
 
-upstream_json="$(python3 "$root/scripts/check_upstream.py")"
-upstream_commit="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["commit"])' <<<"$upstream_json")"
-upstream_commit_date="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["committed_at"])' <<<"$upstream_json")"
-upstream_subject="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["message"])' <<<"$upstream_json")"
+if [ -n "${PYTHON:-}" ]; then
+    python_bin="$PYTHON"
+elif command -v python3 >/dev/null 2>&1; then
+    python_bin="python3"
+else
+    python_bin="python"
+fi
+
+upstream_json="$("$python_bin" "$root/scripts/check_upstream.py")"
+upstream_commit="$("$python_bin" -c 'import json,sys; print(json.load(sys.stdin)["commit"])' <<<"$upstream_json")"
+upstream_commit_date="$("$python_bin" -c 'import json,sys; print(json.load(sys.stdin)["committed_at"])' <<<"$upstream_json")"
+upstream_subject="$("$python_bin" -c 'import json,sys; print(json.load(sys.stdin)["message"])' <<<"$upstream_json")"
 archive_url="https://github.com/bbopt/solar/archive/${upstream_commit}.zip"
 archive_path="$upstream_dir/solar-${upstream_commit}.zip"
 
 clone_upstream() {
-    python3 - "$git_timeout_sec" git -c http.version=HTTP/1.1 clone \
+    "$python_bin" - "$git_timeout_sec" git -c http.version=HTTP/1.1 clone \
         --depth 1 --branch "$branch" "$repo_url" "$checkout_dir" <<'PY'
 import subprocess
 import sys
@@ -92,7 +100,7 @@ else
     subject="$upstream_subject"
 fi
 
-python3 - "$manifest" "$repo_url" "$branch" "$commit" "$commit_date" "$subject" <<'PY'
+"$python_bin" - "$manifest" "$repo_url" "$branch" "$commit" "$commit_date" "$subject" <<'PY'
 import sys
 import json
 from datetime import datetime, timezone

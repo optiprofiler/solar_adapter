@@ -7,10 +7,27 @@ runtime="${1:-$root/build/solar-runtime}"
 
 bash "$root/scripts/build_solar.sh"
 
+if [ -n "${PYTHON:-}" ]; then
+    python_bin="$PYTHON"
+elif command -v python3 >/dev/null 2>&1; then
+    python_bin="python3"
+else
+    python_bin="python"
+fi
+
+case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*)
+        exe_ext=".exe"
+        ;;
+    *)
+        exe_ext=""
+        ;;
+esac
+
 rm -rf "$runtime"
 mkdir -p "$runtime/bin" "$runtime/src" "$runtime/metadata"
 
-cp "$upstream/bin/solar" "$runtime/bin/solar"
+cp "$upstream/bin/solar$exe_ext" "$runtime/bin/solar$exe_ext"
 cp "$upstream/LICENSE" "$runtime/LICENSE"
 cp "$upstream/README.md" "$runtime/README.upstream.md"
 cp "$root/upstream/manifest.json" "$runtime/manifest.json"
@@ -18,7 +35,7 @@ cp "$upstream/src/"*.cpp "$runtime/src/"
 cp "$upstream/src/"*.hpp "$runtime/src/"
 cp "$upstream/src/makefile" "$runtime/src/"
 
-python3 "$root/scripts/write_runtime_metadata.py" "$runtime/metadata"
+"$python_bin" "$root/scripts/write_runtime_metadata.py" "$runtime/metadata"
 
 cat > "$runtime/README.md" <<'EOF'
 # SOLAR Slim Runtime
@@ -30,8 +47,8 @@ history. It keeps only the executable, source needed to rebuild the executable,
 license/readme files, OptiProfiler metadata, and the upstream manifest.
 
 Language-specific wrapper repositories may copy this runtime source without
-committing `bin/solar` or `src/*.o`; those generated files should be rebuilt by
-CI, the server, or the user's local machine.
+committing `bin/solar`, `bin/solar.exe`, or `src/*.o`; those generated files
+should be rebuilt by CI, the server, or the user's local machine.
 EOF
 
 du -sh "$runtime"
