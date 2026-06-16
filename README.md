@@ -22,8 +22,9 @@ OptiProfiler wrappers.
   runtime snapshots.
 - Current upstream commit recorded at scaffold time:
   `dda8fd7f98d4392aa07b3e3056888624a00712a0`
-- Public website status: not listed until `solar_python` and `solar_matlab`
-  wrappers have been reviewed, published, and connected to the platform.
+- Wrapper status: `solar_python` and `solar_matlab` vendor the slim runtime
+  exported by this adapter and expose the public OptiProfiler problem-library
+  name `solar`.
 - Enabled scalar first-pass instances: SOLAR 1-7 and 10.
 - Disabled for now: SOLAR 8-9 are multiobjective; SOLAR 11 returns empty output
   at the documented initial point in the current upstream revision.

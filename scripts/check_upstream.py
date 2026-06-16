@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import urllib.request
 
 
@@ -11,7 +12,16 @@ API_URL = "https://api.github.com/repos/bbopt/solar/commits/master"
 
 
 def main() -> int:
-    with urllib.request.urlopen(API_URL, timeout=30) as response:
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "optiprofiler-solar-adapter",
+    }
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    request = urllib.request.Request(API_URL, headers=headers)
+    with urllib.request.urlopen(request, timeout=30) as response:
         payload = json.load(response)
 
     commit = payload["sha"]
@@ -30,4 +40,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

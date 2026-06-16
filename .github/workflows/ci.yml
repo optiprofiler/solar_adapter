@@ -46,6 +46,7 @@ jobs:
       - name: Sync current upstream snapshot
         shell: bash
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           SOLAR_SYNC_METHOD: git
         run: |
           bash scripts/sync_solar.sh
